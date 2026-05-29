@@ -1,0 +1,12 @@
+/* Основные стили для сайта */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    background: #0a0a2a;
+    color: white;
+}

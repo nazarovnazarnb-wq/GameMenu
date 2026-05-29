@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Игровой портал | SFML STYLE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0a2a, #050510);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        /* ===== НЕОН-СТИЛЬ (по умолчанию) ===== */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.15), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1), transparent 50%);
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-container {
+            position: relative;
+            z-index: 10;
+            background: rgba(10, 10, 30, 0.65);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 45px 55px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.15), inset 0 0 20px rgba(0, 255, 255, 0.05);
+            max-width: 550px;
+            width: 90%;
+            transition: all 0.4s ease;
+        }
+
+        .game-title {
+            font-size: 3.5em;
+            font-weight: 900;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #00ffff, #ff00ff, #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 8px;
+            animation: pulse 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            50% { opacity: 0.95; text-shadow: 0 0 35px rgba(0, 255, 255, 0.8); }
+        }
+
+        .subtitle {
+            color: rgba(0, 255, 255, 0.7);
+            font-size: 0.75em;
+            letter-spacing: 4px;
+            margin-bottom: 35px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            display: inline-block;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .game-btn {
+            position: relative;
+            padding: 14px 25px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .game-btn:hover::before {
+            left: 100%;
+        }
+
+        .game-btn:hover {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: #0ff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-tetris { color: #0ff; }
+        .btn-flappy { color: #f0f; }
+        .btn-tic { color: #0f8; }
+        .btn-snake { color: #0f8; }
+        .btn-2048 { color: #f0f; }
+
+        .footer-info {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
+        }
+
+        .style-toggle-btn, .sound-toggle, .neon-mode-btn {
+            background: none;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            cursor: pointer;
+            color: rgba(0, 255, 255, 0.5);
+            font-size: 0.7em;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .style-toggle-btn:hover, .sound-toggle:hover, .neon-mode-btn:hover {
+            color: #0ff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .style-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 30, 0.95);
+            backdrop-filter: blur(15px);
+            min-width: 160px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 8px 0;
+            z-index: 20;
+            margin-bottom: 10px;
+        }
+
+        .dropdown-content button {
+            background: none;
+            border: none;
+            color: rgba(0, 255, 255, 0.7);
+            padding: 10px 20px;
+            text-align: left;
+            width: 100%;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75em;
+            transition: all 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background: rgba(0, 255, 255, 0.15);
+            color: #0ff;
+        }
+
+        .show {
+            display: block;
+        }
+
+        /* ===== ВСЕ СТИЛИ ДЛЯ МЕНЮ ===== */
+        body.cyber-style { background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #0a0a0a 100%); }
+        body.cyber-style::before { background-image: repeating-linear-gradient(0deg, rgba(255, 0, 255, 0.1) 0px, rgba(255, 0, 255, 0.1) 2px, transparent 2px, transparent 8px), repeating-linear-gradient(90deg, rgba(0, 255, 255, 0.1) 0px, rgba(0, 255, 255, 0.1) 2px, transparent 2px, transparent 8px); }
+        body.cyber-style .game-title { animation: glitch 0.3s infinite; }
+        @keyframes glitch { 0%, 100% { transform: skew(0deg); } 95% { transform: skew(2deg); text-shadow: -2px 0 #ff00ff; } 96% { transform: skew(-2deg); text-shadow: 2px 0 #00ffff; } }
+
+        body.space-style { background: radial-gradient(ellipse at 30% 40%, #0a0a2a, #000010); }
+        body.space-style::before { background-image: radial-gradient(2px 2px at 20px 30px, #fff, transparent), radial-gradient(1px 1px at 80px 150px, #ff0, transparent), radial-gradient(3px 3px at 200px 400px, #0ff, transparent); background-size: 300px 300px; background-repeat: no-repeat; animation: starsMove 40s linear infinite; }
+        @keyframes starsMove { 0% { background-position: 0 0, 0 0, 0 0; } 100% { background-position: 300px 300px, -100px 200px, 200px -100px; } }
+        body.space-style .menu-container { background: rgba(0, 0, 0, 0.6); border-color: rgba(255, 255, 255, 0.3); }
+
+        body.medieval-style { background: linear-gradient(145deg, #2a2418 0%, #1a1510 100%); }
+        body.medieval-style::before { background-image: repeating-linear-gradient(45deg, rgba(80, 60, 40, 0.3) 0px, rgba(80, 60, 40, 0.3) 2px, transparent 2px, transparent 12px); }
+        body.medieval-style .menu-container { background: rgba(30, 25, 18, 0.85); border-color: #b8860b; }
+        body.medieval-style .game-title { background: linear-gradient(135deg, #d4af37, #b8860b, #8b6914); -webkit-background-clip: text; background-clip: text; }
+
+        body.ocean-style { background: linear-gradient(135deg, #003366 0%, #006699 50%, #003366 100%); }
+        body.ocean-style::before { background: repeating-linear-gradient(90deg, rgba(100, 200, 255, 0.15) 0px, rgba(100, 200, 255, 0.15) 2px, transparent 2px, transparent 50px); animation: waveMove 2s linear infinite; }
+        @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(50px); } }
+        body.ocean-style .menu-container { background: rgba(0, 40, 60, 0.7); border-color: #00ccff; }
+        body.ocean-style .game-title { background: linear-gradient(135deg, #00ccff, #0066ff); -webkit-background-clip: text; background-clip: text; }
+
+        body.sakura-style { background: linear-gradient(135deg, #2a0a2a 0%, #4a1a4a 50%, #2a0a2a 100%); }
+        body.sakura-style .menu-container { background: rgba(40, 20, 40, 0.7); border-color: #ff69b4; }
+        body.sakura-style .game-title { background: linear-gradient(135deg, #ff69b4, #ff1493); -webkit-background-clip: text; background-clip: text; }
+
+        body.ice-style { background: linear-gradient(135deg, #1a3a5c 0%, #2a6a8c 50%, #1a3a5c 100%); }
+        body.ice-style .menu-container { background: rgba(30, 50, 70, 0.7); border-color: #88ddff; }
+        body.ice-style .game-title { background: linear-gradient(135deg, #88ddff, #00aaff); -webkit-background-clip: text; background-clip: text; }
+
+        body.apocalypse-style { background: linear-gradient(135deg, #3a2a1a 0%, #5a4a2a 50%, #3a2a1a 100%); }
+        body.apocalypse-style .menu-container { background: rgba(40, 30, 20, 0.8); border-color: #aa8844; }
+        body.apocalypse-style .game-title { background: linear-gradient(135deg, #ccaa66, #aa8844); -webkit-background-clip: text; background-clip: text; }
+
+        body.casino-style { background: linear-gradient(135deg, #1a1a2a 0%, #2a2a4a 50%, #1a1a2a 100%); }
+        body.casino-style .menu-container { background: rgba(20, 20, 40, 0.7); border-color: #ffd700; }
+        body.casino-style .game-title { background: linear-gradient(135deg, #ffd700, #ffaa00); -webkit-background-clip: text; background-clip: text; }
+
+        body.halloween-style { background: linear-gradient(135deg, #1a0a0a 0%, #3a1a1a 50%, #1a0a0a 100%); }
+        body.halloween-style .menu-container { background: rgba(40, 20, 20, 0.7); border-color: #ff6600; }
+        body.halloween-style .game-title { background: linear-gradient(135deg, #ff8800, #ff4400); -webkit-background-clip: text; background-clip: text; }
+
+        body.dark-mode { background: radial-gradient(circle at 20% 30%, #0a0a0a, #000000); }
+        body.dark-mode::before { opacity: 0.2; }
+        body.dark-mode::after { opacity: 0; }
+        body.dark-mode .menu-container { background: rgba(0, 0, 0, 0.8); border-color: rgba(100, 100, 100, 0.3); }
+        body.dark-mode .game-title { background: linear-gradient(135deg, #ccc, #888); -webkit-background-clip: text; background-clip: text; text-shadow: none; animation: none; }
+
+        @media (max-width: 550px) {
+            .menu-container { padding: 25px 20px; }
+            .game-title { font-size: 2.2em; letter-spacing: 3px; }
+            .game-btn { padding: 10px 18px; font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <h1 class="game-title">🎮 GAMES</h1>
+        <div class="subtitle">ВЫБЕРИ ИГРУ</div>
+        
+        <div class="nav-buttons">
+            <button class="game-btn btn-tetris" id="tetrisBtn">🧩 ТЕТРИС</button>
+            <button class="game-btn btn-flappy" id="flappyBtn">🐦 FLAPPY BIRD</button>
+            <button class="game-btn btn-tic" id="ticBtn">❌⭕ КРЕСТИКИ-НОЛИКИ</button>
+            <button class="game-btn btn-snake" id="snakeBtn">🐍 ЗМЕЙКА</button>
+            <button class="game-btn btn-2048" id="game2048Btn">🔢 2048</button>
+        </div>
+        
+        <div class="footer-info">
+            <div class="style-dropdown">
+                <button class="style-toggle-btn" id="styleToggleBtn">✦ SFML ENGINE ✦</button>
+                <div class="dropdown-content" id="styleDropdown">
+                    <button data-style="cyber">🔥 Киберпанк</button>
+                    <button data-style="space">🌌 Космос</button>
+                    <button data-style="medieval">🏰 Средневековье</button>
+                    <button data-style="ocean">💧 Океан</button>
+                    <button data-style="sakura">🌸 Сакура</button>
+                    <button data-style="ice">❄️ Ледяной</button>
+                    <button data-style="apocalypse">💀 Постапокалипсис</button>
+                    <button data-style="casino">🎰 Казино</button>
+                    <button data-style="halloween">🎃 Хэллоуин</button>
+                </div>
+            </div>
+            <button class="sound-toggle" id="soundToggle">🔊 ЗВУК: ВКЛ</button>
+            <button class="neon-mode-btn" id="neonModeBtn">⚡ NEON MODE ⚡</button>
+        </div>
+    </div>
+
+    <script>
+        let soundEnabled = true;
+        let audioContext = null;
+
+        if (localStorage.getItem('soundEnabled') !== null) {
+            soundEnabled = localStorage.getItem('soundEnabled') === 'true';
+        }
+
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function playClickSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.frequency.value = 880;
+                gainNode.gain.value = 0.12;
+                oscillator.type = 'sine';
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.2);
+                oscillator.stop(ctx.currentTime + 0.2);
+            } catch(e) {}
+        }
+
+        function navigateWithSound(url) {
+            playClickSound();
+            setTimeout(() => window.location.href = url, 80);
+        }
+
+        document.getElementById('tetrisBtn').addEventListener('click', () => navigateWithSound('tetris.html'));
+        document.getElementById('flappyBtn').addEventListener('click', () => navigateWithSound('flappy-bird.html'));
+        document.getElementById('ticBtn').addEventListener('click', () => navigateWithSound('tic-tac-toe.html'));
+        document.getElementById('snakeBtn').addEventListener('click', () => navigateWithSound('snake.html'));
+        document.getElementById('game2048Btn').addEventListener('click', () => navigateWithSound('2048.html'));
+
+        const styleToggle = document.getElementById('styleToggleBtn');
+        const dropdown = document.getElementById('styleDropdown');
+        let currentStyle = localStorage.getItem('globalStyle') || null;
+
+        function applyStyle(styleName) {
+            if (currentStyle) {
+                document.body.classList.remove(currentStyle);
+            }
+            if (styleName) {
+                document.body.classList.add(styleName);
+                currentStyle = styleName;
+                localStorage.setItem('globalStyle', styleName);
+                playClickSound();
+            }
+        }
+
+        if (currentStyle) {
+            document.body.classList.add(currentStyle);
+        }
+
+        styleToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+            playClickSound();
+        });
+
+        document.querySelectorAll('#styleDropdown button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const style = btn.dataset.style;
+                applyStyle(`${style}-style`);
+                dropdown.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            dropdown.classList.remove('show');
+        });
+
+        let isNeonOn = true;
+        const neonModeBtn = document.getElementById('neonModeBtn');
+        neonModeBtn.addEventListener('click', () => {
+            playClickSound();
+            if (isNeonOn) {
+                document.body.classList.add('dark-mode');
+                neonModeBtn.innerHTML = '🌙 NEON MODE OFF 🌙';
+                isNeonOn = false;
+            } else {
+                document.body.classList.remove('dark-mode');
+                neonModeBtn.innerHTML = '⚡ NEON MODE ⚡';
+                isNeonOn = true;
+            }
+        });
+
+        const soundToggle = document.getElementById('soundToggle');
+        soundToggle.innerHTML = soundEnabled ? '🔊 ЗВУК: ВКЛ' : '🔇 ЗВУК: ВЫКЛ';
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            soundToggle.innerHTML = soundEnabled ? '🔊 ЗВУК: ВКЛ' : '🔇 ЗВУК: ВЫКЛ';
+            if (soundEnabled) playClickSound();
+        });
+
+        document.body.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
